@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IPassportPhoto extends Document {
   userId: mongoose.Types.ObjectId;
@@ -26,4 +26,7 @@ const passportPhotoSchema = new Schema<IPassportPhoto>(
   { timestamps: true }
 );
 
-export default mongoose.models.PassportPhoto || mongoose.model<IPassportPhoto>('PassportPhoto', passportPhotoSchema);
+const PassportPhoto: Model<IPassportPhoto> =
+  mongoose.models.PassportPhoto || mongoose.model<IPassportPhoto>('PassportPhoto', passportPhotoSchema);
+
+export default PassportPhoto;
