@@ -98,3 +98,12 @@ export function rateLimit(key: string, options: RateLimitOptions): RateLimitResu
   rateLimitStore.set(key, entry);
   return { success: true, remaining: options.limit - entry.count, resetAt: entry.resetAt };
 }
+
+// ── Common rate limit presets ────────────────────────────────────────────────
+export const limits = {
+  auth:      { limit: 5,  windowMs: 15 * 60 * 1000 },  // 5 attempts / 15 min
+  register:  { limit: 3,  windowMs: 60 * 60 * 1000 },  // 3 registrations / hour
+  api:       { limit: 20, windowMs: 60 * 1000 },       // 20 calls / min
+  removeBg:  { limit: 10, windowMs: 60 * 60 * 1000 },  // 10 bg removals / hour
+  save:      { limit: 30, windowMs: 60 * 60 * 1000 },  // 30 saves / hour
+};
