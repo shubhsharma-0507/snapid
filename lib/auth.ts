@@ -8,6 +8,7 @@ import { rateLimit } from './rate-limit';
 import { isValidEmail } from './validation';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+   trustHost: true,   // ye line add karo
   providers: [
     Credentials({
       credentials: {
