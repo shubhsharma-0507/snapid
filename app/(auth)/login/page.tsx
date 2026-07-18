@@ -13,16 +13,23 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); setLoading(true); setError('');
-    try {
-      const r = await signIn('credentials',{email,password,redirect:false});
-      if(r?.error) setError('Invalid email or password');
-      else router.push('/dashboard');
-    } catch { setError('Something went wrong'); }
-    finally { setLoading(false); }
-  };
-
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault(); setLoading(true); setError('');
+  try {
+    const r = await signIn('credentials', { email, password, redirect: false });
+    if (r?.error) {
+      setError('Invalid email or password');
+    } else {
+      // 🔧 FIX: naya session cookie aane ke baad
+      // stale client-side Router Cache invalidate karo,
+      // taaki agli navigation (jaise "Generate Photo") 
+      // purana cached redirect-to-login reuse na kare.
+      router.refresh();
+      router.push('/dashboard');
+    }
+  } catch { setError('Something went wrong'); }
+  finally { setLoading(false); }
+};
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-20">
       <div className="w-full max-w-md relative z-10">
