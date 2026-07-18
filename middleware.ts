@@ -10,7 +10,7 @@ const token = await getToken({
   secret: process.env.NEXTAUTH_SECRET,
   secureCookie: req.nextUrl.protocol === 'https:',
 });
-  const isAuth  = !token;
+  const isAuth  = token;
   const isAdmin = token?.role === 'admin';
 
   // Admin routes
@@ -25,7 +25,7 @@ const token = await getToken({
   if (protectedPaths.some(p => pathname.startsWith(p))) {
     if (!isAuth) {
       const loginUrl = new URL('/login', req.nextUrl.origin);
-      // loginUrl.searchParams.set('callbackUrl', pathname);
+      loginUrl.searchParams.set('callbackUrl', pathname);
       return NextResponse.redirect(loginUrl);
     }
   }
