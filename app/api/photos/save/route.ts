@@ -4,9 +4,8 @@ import { connectDB } from '@/lib/db';
 import PassportPhoto from '@/models/PassportPhoto';
 import { NextRequest, NextResponse } from 'next/server';
 import { v2 as cloudinary } from 'cloudinary';
-import { rateLimit, limits } from '@/lib/rate-limit';
 import { isValidBase64Image, sanitizeString } from '@/lib/validation';
-
+import { rateLimit, limits } from '@/lib/rate-limit';
 cloudinary.config({
   cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
   api_key:    process.env.CLOUDINARY_API_KEY,

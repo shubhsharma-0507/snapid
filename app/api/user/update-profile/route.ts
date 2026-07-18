@@ -3,7 +3,8 @@ import { auth } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
 import User from '@/models/User';
 import { NextRequest, NextResponse } from 'next/server';
-import { sanitizeName, rateLimit, limits } from '@/lib/validation';
+import { sanitizeName } from '@/lib/validation';
+import { rateLimit } from '@/lib/rate-limit';
 
 export async function PUT(req: NextRequest) {
   try {
@@ -12,8 +13,7 @@ export async function PUT(req: NextRequest) {
 
     // Rate limit: 10 profile updates per hour
     const userId = (session.user as any).id;
-    const rl = rateLimit(`profile:${userId}`, { limit: 10, windowMs: 60 * 60 * 1000 });
-    if (!rl.success) return NextResponse.json({ error: 'Too many updates. Try later.' }, { status: 429 });
+const rl = rateLimit(`profile:${userId}`, { limit: 10, windowMs: 60 * 60 * 1000 });    if (!rl.success) return NextResponse.json({ error: 'Too many updates. Try later.' }, { status: 429 });
 
     const { name } = await req.json();
     const cleanName = sanitizeName(name || '');

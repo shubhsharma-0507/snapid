@@ -4,34 +4,23 @@ import Credentials from 'next-auth/providers/credentials';
 import { connectDB } from './db';
 import User from '@/models/User';
 import bcryptjs from 'bcryptjs';
-import { rateLimit } from './rate-limit';
-import { isValidEmail } from './validation';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-   trustHost: true,   // ye line add karo
   providers: [
     Credentials({
       credentials: {
         email:    { label: 'Email',    type: 'email'    },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(credentials, req) {
+      async authorize(credentials) {
         const email    = (credentials?.email    as string || '').toLowerCase().trim();
         const password = credentials?.password  as string || '';
 
         if (!email || !password) throw new Error('Missing credentials');
-        if (!isValidEmail(email)) throw new Error('Invalid email');
-
-        // ── Brute-force protection ─────────────────────────────────────
-        const rl = rateLimit(`login:${email}`, { limit: 5, windowMs: 15 * 60 * 1000 });
-        if (!rl.success) {
-          throw new Error('Too many login attempts. Try again in 15 minutes.');
-        }
 
         await connectDB();
         const user = await User.findOne({ email });
 
-        // Generic error — no user enumeration
         if (!user) throw new Error('Invalid credentials');
 
         const valid = await bcryptjs.compare(password, user.passwordHash);
@@ -53,12 +42,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.role = (user as any).role;
         token.name = user.name;
       }
-      // Re-fetch name from DB on session update
+      // Re-fetch name from DB only on explicit update() call
       if (trigger === 'update') {
         try {
           await connectDB();
-          const dbUser = await User.findById(token.id).select('name');
-          if (dbUser) token.name = dbUser.name;
+          const dbUser = await User.findById(token.id).select('name role');
+          if (dbUser) {
+            token.name = dbUser.name;
+            token.role = dbUser.role;
+          }
         } catch {}
       }
       return token;
@@ -73,15 +65,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
   pages:   { signIn: '/login' },
-  session: { strategy: 'jwt', maxAge: 24 * 60 * 60 }, // 24 hours (was 30 days)
-  cookies: {
-    sessionToken: {
-      options: {
-        httpOnly: true,   // XSS protection
-        sameSite: 'lax',  // CSRF protection
-        secure:   process.env.NODE_ENV === 'production',
-        path:     '/',
-      },
-    },
+  trustHost: true,
+  session: {
+    strategy:  'jwt',
+    maxAge:    30 * 24 * 60 * 60,  // 30 days
+    updateAge: 24 * 60 * 60,       // refresh token every 24h
   },
 });

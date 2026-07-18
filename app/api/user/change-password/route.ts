@@ -4,8 +4,8 @@ import { connectDB } from '@/lib/db';
 import User from '@/models/User';
 import bcryptjs from 'bcryptjs';
 import { NextRequest, NextResponse } from 'next/server';
-import { validatePassword, rateLimit } from '@/lib/validation';
-
+import { validatePassword } from '@/lib/validation';
+import { rateLimit } from '@/lib/rate-limit';
 export async function PUT(req: NextRequest) {
   try {
     const session = await auth();
