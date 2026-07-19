@@ -1,95 +1,50 @@
-import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { NextRequest, NextResponse } from 'next/server';
+import { getToken } from 'next-auth/jwt';
 
-export default auth((req) => {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  const token = req.auth;
 
-  const isAuth = !!token;
-  const isAdmin = token?.role === "admin";
-
+const token = await getToken({
+  req,
+  secret: process.env.NEXTAUTH_SECRET,
+});
+  const isAuth  = !!token;
+  const isAdmin = token?.role === 'admin';
 
   // Admin routes
-  if (pathname.startsWith("/admin")) {
-
-    if (!isAuth) {
-      return NextResponse.redirect(
-        new URL("/login", req.url)
-      );
-    }
-
-    if (!isAdmin) {
-      return NextResponse.redirect(
-        new URL("/dashboard", req.url)
-      );
-    }
-
+  if (pathname.startsWith('/admin')) {
+    if (!isAuth)  return NextResponse.redirect(new URL('/login', req.nextUrl.origin));
+    if (!isAdmin) return NextResponse.redirect(new URL('/dashboard', req.nextUrl.origin));
     return NextResponse.next();
   }
 
-
   // Protected routes
-  const protectedRoutes = [
-    "/dashboard",
-    "/generator",
-    "/history",
-    "/profile",
-  ];
-
-
-  if (
-    protectedRoutes.some((route) =>
-      pathname.startsWith(route)
-    )
-  ) {
-
+  const protectedPaths = ['/dashboard', '/generator', '/history', '/profile'];
+  if (protectedPaths.some(p => pathname.startsWith(p))) {
     if (!isAuth) {
-
-      const loginUrl = new URL(
-        "/login",
-        req.url
-      );
-
-      loginUrl.searchParams.set(
-        "callbackUrl",
-        pathname
-      );
-
+      const loginUrl = new URL('/login', req.nextUrl.origin);
+      loginUrl.searchParams.set('callbackUrl', pathname);
       return NextResponse.redirect(loginUrl);
     }
   }
 
-
-  // Prevent logged user from login/register
-  if (
-    isAuth &&
-    (
-      pathname === "/login" ||
-      pathname === "/register"
-    )
-  ) {
-
-    return NextResponse.redirect(
-      new URL("/dashboard", req.url)
-    );
-
+  // Redirect logged-in away from auth pages
+  if (isAuth && (pathname === '/login' || pathname === '/register')) {
+    return NextResponse.redirect(new URL('/dashboard', req.nextUrl.origin));
   }
 
-
   return NextResponse.next();
-
-});
-
+}
 
 export const config = {
   matcher: [
-    "/dashboard/:path*",
-    "/generator/:path*",
-    "/history/:path*",
-    "/profile/:path*",
-    "/admin/:path*",
-    "/login",
-    "/register",
+    '/dashboard/:path*',
+    '/generator/:path*',
+    '/history/:path*',
+    '/profile/:path*',
+    '/admin/:path*',
+    '/login',
+    '/register',
   ],
 };
