@@ -30,17 +30,8 @@ const handleSubmit = async (e: React.FormEvent) => {
       return;
     }
 
-    // Session cookie set hone ka wait
-    await fetch("/api/auth/session");
-
-    
-    router.refresh();
-// router.push('/dashboard');
-
-    // Thoda delay taaki App Router nayi cookie read kare
-    setTimeout(() => {
-      router.replace("/dashboard");
-    }, 300);
+    // Full reload so middleware gets fresh auth cookie
+    window.location.href = "/dashboard";
 
   } catch {
     setError("Something went wrong");
