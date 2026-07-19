@@ -13,22 +13,38 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
- const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault(); setLoading(true); setError('');
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+  setError("");
+
   try {
-    const r = await signIn('credentials', { email, password, redirect: false });
-    if (r?.error) {
-      setError('Invalid email or password');
-    } else {
-      // 🔧 FIX: naya session cookie aane ke baad
-      // stale client-side Router Cache invalidate karo,
-      // taaki agli navigation (jaise "Generate Photo") 
-      // purana cached redirect-to-login reuse na kare.
-      router.refresh();
-      router.push('/dashboard');
+    const res = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+
+    if (res?.error) {
+      setError("Invalid email or password");
+      return;
     }
-  } catch { setError('Something went wrong'); }
-  finally { setLoading(false); }
+
+    // Session cookie set hone ka wait
+    await fetch("/api/auth/session");
+
+    router.refresh();
+
+    // Thoda delay taaki App Router nayi cookie read kare
+    setTimeout(() => {
+      router.replace("/dashboard");
+    }, 300);
+
+  } catch {
+    setError("Something went wrong");
+  } finally {
+    setLoading(false);
+  }
 };
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-20">
