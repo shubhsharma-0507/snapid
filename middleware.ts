@@ -10,7 +10,7 @@ const token = await getToken({
   secret: process.env.NEXTAUTH_SECRET,
   secureCookie: req.nextUrl.protocol === 'https:',
 });
-  const isAuth  = token;
+  const isAuth  = !token;
   const isAdmin = token?.role === 'admin';
 
   // Admin routes
