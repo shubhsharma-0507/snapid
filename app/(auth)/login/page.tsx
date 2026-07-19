@@ -35,7 +35,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     
     router.refresh();
-router.push('/dashboard');
+// router.push('/dashboard');
 
     // Thoda delay taaki App Router nayi cookie read kare
     setTimeout(() => {
