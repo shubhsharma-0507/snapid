@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const apiKey = process.env.REMOVEBG_API_KEYs;
+    const apiKey = process.env.PICWISH_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ error: 'Service not configured' }, { status: 500 });
     }
