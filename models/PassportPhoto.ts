@@ -30,3 +30,4 @@ const PassportPhoto: Model<IPassportPhoto> =
   mongoose.models.PassportPhoto || mongoose.model<IPassportPhoto>('PassportPhoto', passportPhotoSchema);
 
 export default PassportPhoto;
+
